@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scriptplatform.mapper.ScriptInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.scriptplatform.entity.ScriptInfo">
+        <id column="id" property="id"/>
+        <result column="script_name" property="scriptName"/>
+        <result column="script_path" property="scriptPath"/>
+        <result column="module" property="module"/>
+        <result column="description" property="description"/>
+        <result column="owner" property="owner"/>
+        <result column="alert_dingtalk" property="alertDingtalk"/>
+        <result column="alert_phone" property="alertPhone"/>
+        <result column="schedule_cron" property="scheduleCron"/>
+        <result column="schedule_desc" property="scheduleDesc"/>
+        <result column="script_content" property="scriptContent"/>
+        <result column="version" property="version"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="Brief_Column_List">
+        id, script_name, script_path, module, description, owner,
+        alert_dingtalk, alert_phone, schedule_cron, schedule_desc,
+        version, status, created_at, updated_at
+    </sql>
+
+    <sql id="Full_Column_List">
+        id, script_name, script_path, module, description, owner,
+        alert_dingtalk, alert_phone, schedule_cron, schedule_desc,
+        script_content, version, status, created_at, updated_at
+    </sql>
+
+    <sql id="Query_Where">
+        <where>
+            <if test="scriptName != null and scriptName != ''">
+                and script_name like concat('%', #{scriptName}, '%')
+            </if>
+            <if test="module != null and module != ''">
+                and module = #{module}
+            </if>
+            <if test="owner != null and owner != ''">
+                and owner like concat('%', #{owner}, '%')
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        select <include refid="Full_Column_List"/> from script_info
+        <include refid="Query_Where"/>
+        order by id desc
+    </select>
+
+    <select id="selectPageBrief" resultMap="BaseResultMap">
+        select <include refid="Brief_Column_List"/> from script_info
+        <include refid="Query_Where"/>
+        order by id desc
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        select <include refid="Full_Column_List"/> from script_info where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.scriptplatform.entity.ScriptInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into script_info (
+            script_name, script_path, module, description, owner,
+            alert_dingtalk, alert_phone, schedule_cron, schedule_desc,
+            script_content, version, status
+        ) values (
+            #{scriptName}, #{scriptPath}, #{module}, #{description}, #{owner},
+            #{alertDingtalk}, #{alertPhone}, #{scheduleCron}, #{scheduleDesc},
+            #{scriptContent}, #{version}, #{status}
+        )
+    </insert>
+
+    <update id="updateWithVersion" parameterType="com.scriptplatform.entity.ScriptInfo">
+        update script_info
+        set script_name    = #{scriptName},
+            script_path    = #{scriptPath},
+            module         = #{module},
+            description    = #{description},
+            owner          = #{owner},
+            alert_dingtalk = #{alertDingtalk},
+            alert_phone    = #{alertPhone},
+            schedule_cron  = #{scheduleCron},
+            schedule_desc  = #{scheduleDesc},
+            script_content = #{scriptContent},
+            status         = #{status},
+            version        = version + 1
+        where id = #{id} and version = #{version}
+    </update>
+
+    <update id="updateStatus">
+        update script_info set status = #{status} where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from script_info where id = #{id}
+    </delete>
+
+    <select id="distinctModules" resultType="java.lang.String">
+        select distinct module from script_info where module is not null and module &lt;&gt; '' order by module
+    </select>
+
+</mapper>

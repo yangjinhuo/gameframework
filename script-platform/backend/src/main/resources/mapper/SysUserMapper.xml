@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scriptplatform.mapper.SysUserMapper">
+
+    <resultMap id="BaseResultMap" type="com.scriptplatform.entity.SysUser">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="role" property="role"/>
+        <result column="status" property="status"/>
+        <result column="remark" property="remark"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, username, password, role, status, remark, created_at, updated_at
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from sys_user
+        <where>
+            <if test="username != null and username != ''">
+                and username like concat('%', #{username}, '%')
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                and created_at &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and created_at &lt;= #{endTime}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/> from sys_user where id = #{id}
+    </select>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/> from sys_user where username = #{username} limit 1
+    </select>
+
+    <insert id="insert" parameterType="com.scriptplatform.entity.SysUser" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_user (username, password, role, status, remark)
+        values (#{username}, #{password}, #{role}, #{status}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="com.scriptplatform.entity.SysUser">
+        update sys_user
+        <set>
+            <if test="role != null">role = #{role},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from sys_user where id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        update sys_user set status = #{status} where id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        update sys_user set password = #{password} where id = #{id}
+    </update>
+
+</mapper>
